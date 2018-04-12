@@ -260,11 +260,12 @@ namespace TestTask.ViewModel
                         _Students.Add(
                             new XElement("Student",
                                 new XAttribute("Id", _id.ToString()),
-                                new XElement("Firstname", std.FirstName),
+                                new XElement("FirstName", std.FirstName),
                                 new XElement("Last", std.LastName),
                                 new XElement("Age", std.Age.ToString()),
                                 new XElement("Gender", ((int)std.Gender).ToString())
                             ));
+                        _id++;
                     }
                     xdoc.Save(Filename);
                     return true;
@@ -291,11 +292,13 @@ namespace TestTask.ViewModel
                 try
                 {
                     XDocument xdoc = XDocument.Load(Filename);
+                    if (Students == null) Students = new ObservableCollection<Student>();
                     foreach (XElement student in xdoc.Element("Students").Elements("Student"))
                     {
                         Students.Add(
                             new Student
                             {
+                                Id = Int32.Parse(student.Attribute("Id").Value),
                                 FirstName = student.Element("FirstName").Value,
                                 LastName = student.Element("Last").Value,
                                 Age = Int32.Parse(student.Element("Age").Value),
