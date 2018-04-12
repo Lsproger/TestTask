@@ -48,6 +48,12 @@ namespace TestTask.ViewModel
             set { SetValue(() => EmptyStudentsList, value); }
         }
 
+        public Visibility EditingStudent
+        {
+            get { return GetValue(() => EditingStudent); }
+            set { SetValue(() => EditingStudent, value); }
+        }
+
         public ObservableCollection<Student> Students
         {
             get { return GetValue(() => Students); }
@@ -101,11 +107,11 @@ namespace TestTask.ViewModel
             UpdateCommand = new RelayCommand(Update, CanUpdate);
             SaveCommand = new RelayCommand(Save, CanSave);
             CancelCommand = new RelayCommand(Cancel);
-            ConfirmCommand = new RelayCommand(Confirm, CanConfirm);
             SaveDataCommand = new RelayCommand(SaveData);
 
-            AddingStudent = Visibility.Collapsed;
-            UpdatingStudent = Visibility.Collapsed;
+            EditingStudent = Visibility.Collapsed;
+            //AddingStudent = Visibility.Collapsed;
+            //UpdatingStudent = Visibility.Collapsed;
         }
 
         #endregion
@@ -113,8 +119,6 @@ namespace TestTask.ViewModel
 
         #region Commands
         public RelayCommand AddCommand { get; set; }
-
-        public RelayCommand ConfirmCommand { get; set; }
 
         public RelayCommand SaveCommand { get; set; }
 
@@ -155,7 +159,7 @@ namespace TestTask.ViewModel
                 Age = SelectedStudent.Age,
                 Gender = SelectedStudent.Gender
             };
-            UpdatingStudent = Visibility.Visible;
+            EditingStudent = Visibility.Visible;
         }
 
         public void Delete(object parameter)
@@ -176,33 +180,34 @@ namespace TestTask.ViewModel
 
         public void Add(object parameter)
         {
-            AddingStudent = Visibility.Visible;
+            EditingStudent = Visibility.Visible;
             NewStudent = new Student();
+            if (Students.Count != 0)
+                NewStudent.Id = Students.Last().Id + 1;
+            else NewStudent.Id = 0;
         }
 
         public void Save(object parameter)
         {
-            Students.Add(NewStudent);
-            NewStudent = new Student();
-            AddingStudent = Visibility.Collapsed;
+            if (Students.Where(x => x.Id == NewStudent.Id).Count() == 0)
+            {
+                Students.Add(NewStudent);
+                NewStudent = new Student();
+                EditingStudent = Visibility.Collapsed;
+            }
+            else
+            {
+
+                SelectedStudent.Id = NewStudent.Id;
+                SelectedStudent.FirstName = NewStudent.FirstName;
+                SelectedStudent.LastName = NewStudent.LastName;
+                SelectedStudent.Age = NewStudent.Age;
+                SelectedStudent.Gender = NewStudent.Gender;
+                SelectedStudent = null;
+                EditingStudent = Visibility.Collapsed;
+            }
         }
 
-        public void Confirm(object parameter)
-        {
-            SelectedStudent.Id = NewStudent.Id;
-            SelectedStudent.FirstName = NewStudent.FirstName;
-            SelectedStudent.LastName = NewStudent.LastName;
-            SelectedStudent.Age = NewStudent.Age;
-            SelectedStudent.Gender = NewStudent.Gender;
-            SelectedStudent = null;
-
-            UpdatingStudent = Visibility.Collapsed;
-        }
-
-        public bool CanConfirm(object parameter)
-        {
-            return ErrorsUpd == 0 ? true : false;
-        }
 
         public bool CanSave(object parameter)
         {
@@ -225,8 +230,7 @@ namespace TestTask.ViewModel
         public void Cancel(object parameter)
         {
             NewStudent = new Student();
-            AddingStudent = Visibility.Collapsed;
-            UpdatingStudent = Visibility.Collapsed;
+            EditingStudent = Visibility.Collapsed;
         }
 
         public void SaveData(object parameter)
@@ -277,7 +281,6 @@ namespace TestTask.ViewModel
         private async void DeserializeStudentsListAsync()
         {
             bool deserialize = await LoadFromFile();
-            if (deserialize) MessageBox.Show("All data is readed!");
         }
 
         private async Task<bool> LoadFromFile()

@@ -70,10 +70,10 @@
                             <Label Content="{Binding LastName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <Label Content="Возраст"/>
+                            <Label Content="Age:"/>
                             <Label Content="{Binding Age, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                            <Label Content="лет"/>
-                            <Label Content="Пол"/>
+                            <Label Content="years"/>
+                            <Label Content="Gender:"/>
                             <Label Content="{Binding Gender, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
                         </StackPanel>
                     </StackPanel>
@@ -91,7 +91,7 @@
             </StackPanel>
 
             
-            <StackPanel Visibility="{Binding AddingStudent, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            <StackPanel Visibility="{Binding EditingStudent, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
                 <TextBlock Style="{StaticResource TextBlockStyle}" Text="Add New Student" Margin="0,10,0,10"/>
 
                 <Grid x:Name="GrdStudent" DataContext="{Binding NewStudent, ValidatesOnDataErrors=True}">
@@ -126,46 +126,6 @@
                 </Grid>
                 <StackPanel Orientation="Horizontal">
                     <Button Content="Save" Command="{Binding SaveCommand}" Width="60" Height="30" Margin="10,15,0,15" />
-                    <Button Content="Cancel" Command="{Binding CancelCommand}" Width="60" Height="30" Margin="10,15,0,15" />
-                </StackPanel>
-            </StackPanel>
-
-
-            <StackPanel Visibility="{Binding UpdatingStudent, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-                <TextBlock Style="{StaticResource TextBlockStyle}" Text="Update Student" Margin="0,10,0,10"/>
-
-                <Grid x:Name="UpdStudent" DataContext="{Binding NewStudent, ValidatesOnDataErrors=True}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="120"/>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Style="{StaticResource TextBlockStyle}" Grid.Column="0" Grid.Row="0" Text="Name : "/>
-                    <TextBox x:Name="TxtNameUpd" Style="{StaticResource TextBoxStyle}" Grid.Column="1" Grid.Row="0" Width="100" Text="{Binding FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True,NotifyOnValidationError=True}" Validation.Error="Validation_Error"  />
-                    <TextBlock Style="{StaticResource TextBlockStyle}" Grid.Column="2" Grid.Row="0" Text="{Binding (Validation.Errors)[0].ErrorContent, ElementName=TxtNameUpd}" Foreground="Red" Margin="5,0,0,0"/>
-
-
-                    <TextBlock Style="{StaticResource TextBlockStyle}" Grid.Column="0" Grid.Row="1" Text="Last : "/>
-                    <TextBox x:Name="TxtLastUpd" Style="{StaticResource TextBoxStyle}" Grid.Column="1" Grid.Row="1" Text="{Binding LastName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True,NotifyOnValidationError=True}" Width="100" Validation.Error="Validation_Error" />
-                    <TextBlock Style="{StaticResource TextBlockStyle}" Grid.Column="2" Grid.Row="1" Text="{Binding (Validation.Errors)[0].ErrorContent, ElementName=TxtLastUpd}" Foreground="Red" Margin="5,0,0,0"/>
-
-
-                    <TextBlock Style="{StaticResource TextBlockStyle}" Grid.Column="0" Grid.Row="2" Text="Age : "/>
-                    <TextBox x:Name="TxtAgeUpd" Style="{StaticResource TextBoxStyle}" Grid.Column="1" Grid.Row="2" Width="100" Text="{Binding Age, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True,NotifyOnValidationError=True}" Validation.Error="Validation_Error"  />
-                    <TextBlock Style="{StaticResource TextBlockStyle}" Grid.Column="2" Grid.Row="2" Text="{Binding (Validation.Errors)[0].ErrorContent, ElementName=TxtAgeUpd}" Foreground="Red" Margin="5,0,0,0"/>
-
-                    <TextBlock Style="{StaticResource TextBlockStyle}" Grid.Column="0" Grid.Row="3" Text="Gender : "/>
-                    <ComboBox x:Name="CbxGenderUpd" Grid.Column="1" SelectedIndex="0" Grid.Row="3" Width="100" SelectedItem="{Binding Gender, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={local:Enumeration {x:Type Model:Gender}}}" Validation.ErrorTemplate="{x:Null}"  DisplayMemberPath="Description" SelectedValuePath="Value"/>
-
-                </Grid>
-                <StackPanel Orientation="Horizontal">
-                    <Button Content="Confirm" Command="{Binding ConfirmCommand}" Width="60" Height="30" Margin="10,15,0,15" />
                     <Button Content="Cancel" Command="{Binding CancelCommand}" Width="60" Height="30" Margin="10,15,0,15" />
                 </StackPanel>
             </StackPanel>

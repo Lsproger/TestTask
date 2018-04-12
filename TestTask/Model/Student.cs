@@ -34,7 +34,7 @@ namespace TestTask.Model
         }
 
 
-        [Range(10, 100, ErrorMessage = "Age should be between 1 to 100")]
+        [Range(16, 100, ErrorMessage = "Age should be between 16 to 100")]
         public int Age
         {
             get { return GetValue(() => Age); }

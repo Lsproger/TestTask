@@ -1,50 +1,56 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Students>
   <Student Id="0">
-    <FirstName>Robert</FirstName>
+    <Firstname>Robert</Firstname>
     <Last>Jarman</Last>
     <Age>21</Age>
     <Gender>0</Gender>
   </Student>
-  <Student Id="1">
-    <FirstName>Leona</FirstName>
+  <Student Id="0">
+    <Firstname>Leona</Firstname>
     <Last>Menders</Last>
     <Age>20</Age>
     <Gender>1</Gender>
   </Student>
-  <Student Id="2">
-    <FirstName>Helen</FirstName>
+  <Student Id="0">
+    <Firstname>Helen</Firstname>
     <Last>Wilson</Last>
     <Age>21</Age>
     <Gender>1</Gender>
   </Student>
-  <Student Id="3">
-    <FirstName>John</FirstName>
+  <Student Id="0">
+    <Firstname>John</Firstname>
     <Last>Smith</Last>
     <Age>22</Age>
     <Gender>0</Gender>
   </Student>
-  <Student Id="4">
-    <FirstName>Алексей</FirstName>
+  <Student Id="0">
+    <Firstname>Алексей</Firstname>
     <Last>Дроздов</Last>
     <Age>19</Age>
     <Gender>0</Gender>
   </Student>
-  <Student Id="5">
-    <FirstName>Вадим</FirstName>
+  <Student Id="0">
+    <Firstname>Вадим</Firstname>
     <Last>Халтурин</Last>
     <Age>21</Age>
     <Gender>0</Gender>
   </Student>
-  <Student Id="6">
-    <FirstName>Анна</FirstName>
+  <Student Id="0">
+    <Firstname>Анна</Firstname>
     <Last>Говорухина</Last>
     <Age>20</Age>
     <Gender>1</Gender>
   </Student>
-  <Student Id="7">
-    <FirstName>Александр</FirstName>
+  <Student Id="0">
+    <Firstname>Александр</Firstname>
     <Last>Иванов</Last>
+    <Age>20</Age>
+    <Gender>0</Gender>
+  </Student>
+  <Student Id="0">
+    <Firstname>Yury</Firstname>
+    <Last>Mikhnovets</Last>
     <Age>20</Age>
     <Gender>0</Gender>
   </Student>
