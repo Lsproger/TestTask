@@ -10,18 +10,19 @@ using TestTask.Notification;
 using TestTask.Model;
 using TestTask.Commands;
 using System.Windows;
+using System.Xml.Linq;
 
 namespace TestTask.ViewModel
 {
     public class StudentViewModel : PropertyChangedNotification
     {
         private static StudentViewModel studentViewModel;
-        private static string Filename = Directory.GetCurrentDirectory() + "\\Output.xml";
+        private static string Filename = "Resources/Students.xml";
 
         public Visibility IsUpdatingStudent
         {
-            get { return GetValue(()=>IsUpdatingStudent); }
-            set { SetValue(()=>IsUpdatingStudent, value); }
+            get { return GetValue(() => IsUpdatingStudent); }
+            set { SetValue(() => IsUpdatingStudent, value); }
         }
 
         public Visibility IsAddingStudent
@@ -67,19 +68,22 @@ namespace TestTask.ViewModel
 
         public static StudentViewModel SharedViewModel()
         {
+
             return studentViewModel ?? (studentViewModel = new StudentViewModel());
         }
 
         private StudentViewModel()
         {
+            Students = new ObservableCollection<Student>();
             if (File.Exists(Filename))
             {
-                Students = Deserialize<ObservableCollection<Student>>();
+                //Deserialize();
+                DeserializeStudentsListAsync();
             }
             else
             {
-                Students = new ObservableCollection<Student>();
-                Students.Add(new Student { Id = 1, FirstName = "William", LastName = "William", Age = 23, Gender = Gender.Male });
+                XDocument xd = new XDocument();
+                xd.Save(Filename);
             }
 
             NewStudent = new Student();
@@ -147,49 +151,100 @@ namespace TestTask.ViewModel
 
         public void SaveData(object parameter)
         {
-            var result = Serialize<ObservableCollection<Student>>(Students);
-            if (result) MessageBox.Show("Data Saved Successfully", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-            else MessageBox.Show("Data Not Saved", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            SerializeStudentsListAsync();
         }
 
-        private bool Serialize<T>(T value)
+        private async void SerializeStudentsListAsync()
         {
-            if (value == null)
+            bool serialize = await WriteToFile();
+            if (serialize) MessageBox.Show("All data is writed!");
+        }
+
+        private async Task<bool> WriteToFile()
+        {
+            return await Task.Run(() =>
             {
-                return false;
-            }
-            try
+                try
+                {
+                    XDocument xdoc = XDocument.Load(Filename);
+                    xdoc.Element("Students").RemoveAll();
+                    XElement _Students = xdoc.Element("Students");
+                    int _id = 0;
+                    foreach (Student std in Students)
+                    {
+                        _Students.Add(
+                            new XElement("Student",
+                                new XAttribute("Id", _id.ToString()),
+                                new XElement("Firstname", std.FirstName),
+                                new XElement("Last", std.LastName),
+                                new XElement("Age", std.Age.ToString()),
+                                new XElement("Gender", ((int)std.Gender).ToString())
+                            ));
+                    }
+                    xdoc.Save(Filename);
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show("Writing faliled!\n" + e.Message);
+                    return false;
+                }
+
+            });
+        }
+
+
+        private async void DeserializeStudentsListAsync()
+        {
+            bool deserialize = await LoadFromFile();
+            if (deserialize) MessageBox.Show("All data is readed!");
+        }
+
+        private void Deserialize()
+        {
+            XDocument xdoc = XDocument.Load(Filename);
+            foreach (XElement student in xdoc.Element("Students").Elements("Student"))
             {
-                XmlSerializer _xmlserializer = new XmlSerializer(typeof(T));
-                Stream stream = new FileStream(Filename, FileMode.CreateNew);
-                _xmlserializer.Serialize(stream, value);
-                stream.Close();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                return false;
+                Students.Add(
+                    new Student
+                    {
+                        FirstName = student.Element("FirstName").Value,
+                        LastName = student.Element("Last").Value,
+                        Age = Int32.Parse(student.Element("Age").Value),
+                        Gender = student.Element("Gender").Value == "0" ? Gender.Male : Gender.Female
+                    });
             }
         }
 
-        private T Deserialize<T>()
+
+        private async Task<bool> LoadFromFile()
         {
-            if (string.IsNullOrEmpty(Filename))
+            
+            return await Task.Run(()=>
             {
-                return default(T);
+                try
+                {
+                    XDocument xdoc = XDocument.Load(Filename);
+                    foreach (XElement student in xdoc.Element("Students").Elements("Student"))
+                    {
+                        Students.Add(
+                            new Student
+                            {
+                                FirstName = student.Element("FirstName").Value,
+                                LastName = student.Element("Last").Value,
+                                Age = Int32.Parse(student.Element("Age").Value),
+                                Gender = student.Element("Gender").Value == "0" ? Gender.Male : Gender.Female
+                            });
+                    }
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show("Reading faliled!\n" + e.Message);
+                    return false;
+                }
             }
-            try
-            {
-                XmlSerializer _xmlSerializer = new XmlSerializer(typeof(T));
-                Stream stream = new FileStream(Filename, FileMode.Open, FileAccess.Read);
-                var result = (T)_xmlSerializer.Deserialize(stream);
-                stream.Close();
-                return result;
-            }
-            catch (Exception ex)
-            {
-                return default(T);
-            }
+            );
         }
     }
 
