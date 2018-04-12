@@ -31,7 +31,7 @@ namespace TestTask
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             var errorsAdding = GrdStudent.GetValue(Validation.ErrorsProperty);
-            var errorsUpdating = UpdStudent.GetValue(Validation.ErrorsProperty);
+          //  var errorsUpdating = UpdStudent.GetValue(Validation.ErrorsProperty);
         }
 
         private void Validation_Error(object sender, ValidationErrorEventArgs e)

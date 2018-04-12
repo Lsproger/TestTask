@@ -19,22 +19,42 @@ namespace TestTask.ViewModel
         private static StudentViewModel studentViewModel;
         private static string Filename = "Resources/Students.xml";
 
-        public Visibility IsUpdatingStudent
+        #region Properties
+        public static int Errors { get; set; }
+
+        public static int ErrorsUpd { get; set; }
+
+        public Visibility UpdatingStudent
         {
-            get { return GetValue(() => IsUpdatingStudent); }
-            set { SetValue(() => IsUpdatingStudent, value); }
+            get { return GetValue(() => UpdatingStudent); }
+            set { SetValue(() => UpdatingStudent, value); }
         }
 
-        public Visibility IsAddingStudent
+        public Visibility AddingStudent
         {
-            get { return GetValue(() => IsAddingStudent); }
-            set { SetValue(() => IsAddingStudent, value); }
+            get { return GetValue(() => AddingStudent); }
+            set { SetValue(() => AddingStudent, value); }
+        }
+
+        public Visibility StudentsList
+        {
+            get { return GetValue(() => StudentsList); }
+            set { SetValue(() => StudentsList, value); }
+        }
+
+        public Visibility EmptyStudentsList
+        {
+            get { return GetValue(() => EmptyStudentsList); }
+            set { SetValue(() => EmptyStudentsList, value); }
         }
 
         public ObservableCollection<Student> Students
         {
             get { return GetValue(() => Students); }
-            set { SetValue(() => Students, value); }
+            set
+            {
+                SetValue(() => Students, value);
+            }
         }
 
         public Student NewStudent
@@ -49,29 +69,16 @@ namespace TestTask.ViewModel
             set { SetValue(() => SelectedStudent, value); }
         }
 
-
-        public RelayCommand AddCommand { get; set; }
-
-        public RelayCommand SaveCommand { get; set; }
-
-        public RelayCommand UpdateCommand { get; set; }
-
-        public RelayCommand DeleteCommand { get; set; }
-
-        public RelayCommand ClearCommand { get; set; }
-
-        public RelayCommand SaveDataCommand { get; set; }
-
-        public static int Errors { get; set; }
-
-        public static int ErrorsUpd { get; set; }
-
         public static StudentViewModel SharedViewModel()
         {
 
             return studentViewModel ?? (studentViewModel = new StudentViewModel());
         }
+        
+        #endregion
 
+
+        #region Constructors
         private StudentViewModel()
         {
             Students = new ObservableCollection<Student>();
@@ -86,22 +93,69 @@ namespace TestTask.ViewModel
                 xd.Save(Filename);
             }
 
+            Students.CollectionChanged += Students_CollectionChanged;
+
             NewStudent = new Student();
-            DeleteCommand = new RelayCommand(Delete);
+            DeleteCommand = new RelayCommand(Delete, CanDelete);
             AddCommand = new RelayCommand(Add);
             UpdateCommand = new RelayCommand(Update, CanUpdate);
             SaveCommand = new RelayCommand(Save, CanSave);
-            ClearCommand = new RelayCommand(Clear);
+            CancelCommand = new RelayCommand(Cancel);
+            ConfirmCommand = new RelayCommand(Confirm, CanConfirm);
             SaveDataCommand = new RelayCommand(SaveData);
 
-            IsAddingStudent = Visibility.Collapsed;
-            IsUpdatingStudent = Visibility.Collapsed;
+            AddingStudent = Visibility.Collapsed;
+            UpdatingStudent = Visibility.Collapsed;
         }
 
+        #endregion
+
+
+        #region Commands
+        public RelayCommand AddCommand { get; set; }
+
+        public RelayCommand ConfirmCommand { get; set; }
+
+        public RelayCommand SaveCommand { get; set; }
+
+        public RelayCommand UpdateCommand { get; set; }
+
+        public RelayCommand DeleteCommand { get; set; }
+
+        public RelayCommand CancelCommand { get; set; }
+
+        public RelayCommand SaveDataCommand { get; set; }
+        #endregion
+
+
+        #region Methods
+        private void Students_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (IsStudentsListEmpty())
+            {
+                StudentsList = Visibility.Collapsed;
+                EmptyStudentsList = Visibility.Visible;
+            }
+            else
+            {
+                StudentsList = Visibility.Visible;
+                EmptyStudentsList = Visibility.Collapsed;
+            }
+        }
+
+        private bool IsStudentsListEmpty() => Students.Count == 0 ? true : false;
 
         public void Update(object parameter)
         {
-            IsUpdatingStudent = Visibility.Visible;
+            NewStudent = new Student
+            {
+                Id = SelectedStudent.Id,
+                FirstName = SelectedStudent.FirstName,
+                LastName = SelectedStudent.LastName,
+                Age = SelectedStudent.Age,
+                Gender = SelectedStudent.Gender
+            };
+            UpdatingStudent = Visibility.Visible;
         }
 
         public void Delete(object parameter)
@@ -118,9 +172,11 @@ namespace TestTask.ViewModel
             }
         }
 
+        
+
         public void Add(object parameter)
         {
-            IsAddingStudent = Visibility.Visible;
+            AddingStudent = Visibility.Visible;
             NewStudent = new Student();
         }
 
@@ -128,7 +184,24 @@ namespace TestTask.ViewModel
         {
             Students.Add(NewStudent);
             NewStudent = new Student();
-            IsAddingStudent = Visibility.Collapsed;
+            AddingStudent = Visibility.Collapsed;
+        }
+
+        public void Confirm(object parameter)
+        {
+            SelectedStudent.Id = NewStudent.Id;
+            SelectedStudent.FirstName = NewStudent.FirstName;
+            SelectedStudent.LastName = NewStudent.LastName;
+            SelectedStudent.Age = NewStudent.Age;
+            SelectedStudent.Gender = NewStudent.Gender;
+            SelectedStudent = null;
+
+            UpdatingStudent = Visibility.Collapsed;
+        }
+
+        public bool CanConfirm(object parameter)
+        {
+            return ErrorsUpd == 0 ? true : false;
         }
 
         public bool CanSave(object parameter)
@@ -144,9 +217,16 @@ namespace TestTask.ViewModel
             return SelectedStudent == null ? false : true;
         }
 
-        public void Clear(object parameter)
+        public bool CanDelete(object parameter)
+        {
+            return SelectedStudent == null ? false : true;
+        }
+
+        public void Cancel(object parameter)
         {
             NewStudent = new Student();
+            AddingStudent = Visibility.Collapsed;
+            UpdatingStudent = Visibility.Collapsed;
         }
 
         public void SaveData(object parameter)
@@ -154,6 +234,7 @@ namespace TestTask.ViewModel
             SerializeStudentsListAsync();
         }
 
+        #region Serialization and deserialization
         private async void SerializeStudentsListAsync()
         {
             bool serialize = await WriteToFile();
@@ -193,34 +274,16 @@ namespace TestTask.ViewModel
             });
         }
 
-
         private async void DeserializeStudentsListAsync()
         {
             bool deserialize = await LoadFromFile();
             if (deserialize) MessageBox.Show("All data is readed!");
         }
 
-        private void Deserialize()
-        {
-            XDocument xdoc = XDocument.Load(Filename);
-            foreach (XElement student in xdoc.Element("Students").Elements("Student"))
-            {
-                Students.Add(
-                    new Student
-                    {
-                        FirstName = student.Element("FirstName").Value,
-                        LastName = student.Element("Last").Value,
-                        Age = Int32.Parse(student.Element("Age").Value),
-                        Gender = student.Element("Gender").Value == "0" ? Gender.Male : Gender.Female
-                    });
-            }
-        }
-
-
         private async Task<bool> LoadFromFile()
         {
-            
-            return await Task.Run(()=>
+
+            return await Task.Run(() =>
             {
                 try
                 {
@@ -246,6 +309,11 @@ namespace TestTask.ViewModel
             }
             );
         }
+        #endregion
+
+        #endregion
+
+
     }
 
 }
